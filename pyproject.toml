@@ -1,0 +1,18 @@
+[project]
+name = "makefiles"
+version = "0.0.0"
+description = "Tests of the shared makefile modules (not a package)"
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "ruff",
+]
+
+[tool.ruff]
+line-length = 89
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
