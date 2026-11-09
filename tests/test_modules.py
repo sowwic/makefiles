@@ -254,6 +254,25 @@ def test_qrc_compiles_the_package_resources(make_project):
     assert "src/demo_pkg/resources/resources_rc.py" in output
 
 
+def test_maya_dist_installs_from_the_project_folder_not_from_a_wheel(make_project):
+    project = make_project(["general/python", "dcc/maya"])
+
+    output = dry(project, "dist")
+
+    assert "uv pip install --target dist/demo_pkg_module/python .\n" in output
+    assert "uv build" not in output and "*.whl" not in output
+
+
+def test_maya_dist_runs_the_build_prerequisites_first(make_project):
+    project = make_project(
+        ["general/python", "general/qt", "dcc/maya"], before="BUILD_PREREQS = qrc"
+    )
+
+    output = dry(project, "dist")
+
+    assert output.index("pyside6-rcc") < output.index("uv pip install")
+
+
 def maya_env(tmp_path):
     env_file = tmp_path / "maya.env"
     env_file.write_text("MAYAPY=/maya/bin/mayapy\nMAYA_MODULE_PATH=/maya/modules\n")

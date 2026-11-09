@@ -26,11 +26,13 @@ venv: ## Recreate .venv using the Python version of mayapy (MAYAPY from the env 
 dev: venv ## Create venv and enter it
 	@. .venv/bin/activate && exec $$SHELL
 
+# The package is installed from the project folder, not from a built wheel: uv then follows
+# [tool.uv.sources], so dependencies that only exist as git sources can be installed.
 .PHONY: dist
-dist: build ## Assemble dist/<package>_module (python + plug-ins)
+dist: $(BUILD_PREREQS) ## Assemble dist/<package>_module (python + plug-ins)
 	@rm -rf $(DIST_MODULE_ROOT)
 	@mkdir -p $(DIST_MODULE_ROOT)/python $(DIST_MODULE_ROOT)/plug-ins
-	@uv pip install --target $(DIST_MODULE_ROOT)/python $(DIST_DIR)/*.whl
+	@uv pip install --target $(DIST_MODULE_ROOT)/python .
 	@cp -R $(SOURCE_PLUGINS_DIR)/. $(DIST_MODULE_ROOT)/plug-ins/
 
 .PHONY: maya-module-file
