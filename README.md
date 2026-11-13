@@ -15,6 +15,7 @@ Grouped in folders, a module is named by its path without `.mk` (`general/python
 | `general/bundle` | `bundle` | PyInstaller bundles (needs `general/qt`) |
 | `general/macos-app` | `iconset install` | macOS `.app` (after `general/bundle`) |
 | `general/pypi` | `pypi-publish pypi-publish-dev` | projects published to PyPI |
+| `general/repo` | `init-repo sync-rulesets` | GitHub repo and rulesets setup (after `general/python`) |
 | `dcc/maya` | `venv dev dist maya-module-file install-module install uninstall dispatch-pytest` | Autodesk Maya packages |
 | `dcc/blender` | `extension validate install uninstall` | Blender extensions |
 
@@ -45,6 +46,24 @@ The Copier templates [`copier-python-project`](https://github.com/sowwic/copier-
 [`copier-maya-plugin`](https://github.com/sowwic/copier-maya-plugin) and
 [`copier-blender-extension`](https://github.com/sowwic/copier-blender-extension) generate a Makefile like this.
 
+## Repository setup
+
+The `general/repo` module adds `init-repo` and `sync-rulesets`. They run `scripts/repo_setup.py` of [`sowwic/gh-workflows`](https://github.com/sowwic/gh-workflows)
+(needs `git` and an authenticated `gh`). They are separate on purpose:
+
+- `make init-repo`: for a **new** project only. Creates the GitHub repo with `main` (initial commit) and `develop`
+  at the same commit, makes `develop` the default branch and applies the rulesets. It refuses a folder with commits
+  or an `origin` remote.
+- `make sync-rulesets`: **rulesets only**. It never touches branches, the default branch or settings, so it is safe
+  for existing repos. Try it first with `make sync-rulesets RULESET_FLAGS=--dry-run`.
+
+```sh
+make init-repo REPO_FLAGS=--private
+make sync-rulesets RULESET_CHECKS="linting / lint,tests / unit-tests (ubuntu-latest, 3.14)"
+```
+
+See the gh-workflows README for the rules and for how the required checks are chosen.
+
 ## Inheritance
 
 Set variables **before** the `include`, the modules only use `?=` defaults:
@@ -52,8 +71,10 @@ Set variables **before** the `include`, the modules only use `?=` defaults:
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `APP_NAME`, `PACKAGE_NAME` | none, required | Project (distribution) name and import name |
-| `RELEASE_BRANCH`, `DEVELOP_BRANCH` | `main`, `develop` | Used by `release` |
-| `GH_WORKFLOWS_REF` | `v1` | Version of `sowwic/gh-workflows` whose `release.py` `release` runs |
+| `RELEASE_BRANCH`, `DEVELOP_BRANCH` | `main`, `develop` | Used by `release`, `init-repo` and `sync-rulesets` |
+| `GH_WORKFLOWS_REF` | `v1` | Version of `sowwic/gh-workflows` whose `release.py` `release` runs, and whose `repo_setup.py` runs `init-repo` and `sync-rulesets` |
+| `REPO_FLAGS` | none | Extra flags of `init-repo`, e.g. `--private`, `--repo owner/name`, `--dry-run` |
+| `RULESET_FLAGS`, `RULESET_CHECKS` | none | Extra flags of `sync-rulesets` (`--dry-run`, `--prune`), and the required checks of the develop branch, comma separated |
 | `LINT_PATHS` | `src tests` | Paths of `lint`, `lint-fix` and `format` |
 | `PYTEST_CMD`, `PYTEST_PDB_CMD` | `uv run pytest tests`, the same with `-vvv --pdb ...` | What `pytest` and `pytest-pdb` run |
 | `BUILD_PREREQS` | none | Targets `build` needs first, e.g. `qrc` |

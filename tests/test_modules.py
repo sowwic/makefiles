@@ -202,6 +202,40 @@ def test_release_branch_names_are_variables(make_project):
     assert "--release-branch stable --develop-branch dev" in dry(project, "release")
 
 
+def test_init_repo_and_sync_rulesets_run_the_repo_setup_script(make_project):
+    project = make_project(["general/python", "general/repo"])
+
+    init = dry(project, "init-repo")
+    sync = dry(project, "sync-rulesets")
+
+    assert "gh-workflows/v1/scripts/repo_setup.py" in init
+    assert "python3 - init --release-branch main --develop-branch develop" in init
+    assert "python3 - sync-rulesets --release-branch main --develop-branch develop" in sync
+    assert "--checks" not in sync
+    assert {"init-repo", "sync-rulesets"} <= listed_targets(project)
+    assert not {"init-repo", "sync-rulesets"} & listed_targets(
+        make_project(["general/python"])
+    )
+
+
+def test_repo_setup_follows_the_branch_and_flag_variables(make_project):
+    project = make_project(
+        ["general/python", "general/repo"],
+        before=(
+            "RELEASE_BRANCH = stable\nDEVELOP_BRANCH = dev\nGH_WORKFLOWS_REF = v2\n"
+            "REPO_FLAGS = --private\nRULESET_FLAGS = --dry-run\n"
+            "RULESET_CHECKS = a,b c"
+        ),
+    )
+
+    init = dry(project, "init-repo")
+    sync = dry(project, "sync-rulesets")
+
+    assert "gh-workflows/v2/scripts/repo_setup.py" in init
+    assert "init --release-branch stable --develop-branch dev --private" in init
+    assert '--checks "a,b c" --dry-run' in sync
+
+
 def test_update_make_fetches_the_modules_again(make_project, source):
     project = make_project(["general/python"], fetched=True)
     (source / "general" / "python.mk").write_text(
