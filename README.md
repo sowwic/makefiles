@@ -14,6 +14,7 @@ Grouped in folders, a module is named by its path without `.mk` (`general/python
 | `general/qml` | `qmlls` | QML projects |
 | `general/bundle` | `bundle` | PyInstaller bundles (needs `general/qt`) |
 | `general/macos-app` | `iconset install` | macOS `.app` (after `general/bundle`) |
+| `general/pypi` | `pypi-publish pypi-publish-dev` | projects published to PyPI |
 | `dcc/maya` | `venv dev dist maya-module-file install-module install uninstall dispatch-pytest` | Autodesk Maya packages |
 | `dcc/blender` | `extension validate install uninstall` | Blender extensions |
 

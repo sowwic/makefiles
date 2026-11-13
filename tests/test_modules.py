@@ -365,3 +365,34 @@ def test_a_missing_env_file_is_a_clear_error(make_project, tmp_path):
     result = run(project, "validate", env={**env, "HOME": str(tmp_path)}, check=False)
 
     assert result.returncode != 0
+
+
+def test_pypi_publish_builds_then_uploads_with_uv(make_project):
+    project = make_project(["general/python", "general/pypi"])
+
+    output = dry(project, "pypi-publish")
+
+    assert listed_targets(project) >= {"pypi-publish"}
+    assert output.index("uv build") < output.index("uv publish")
+    assert "uv publish dist/*" in output
+
+
+def test_pypi_publish_url_can_be_overridden(make_project):
+    project = make_project(
+        ["general/python", "general/pypi"],
+        before="PYPI_PUBLISH_URL = https://test.pypi.org/legacy/",
+    )
+
+    assert "--publish-url https://test.pypi.org/legacy/ dist/*" in dry(
+        project, "pypi-publish"
+    )
+
+
+def test_pypi_publish_dev_uploads_to_testpypi(make_project):
+    project = make_project(["general/python", "general/pypi"])
+
+    output = dry(project, "pypi-publish-dev")
+
+    assert "pypi-publish-dev" in listed_targets(project)
+    assert output.index("uv build") < output.index("uv publish")
+    assert "--publish-url https://test.pypi.org/legacy/ dist/*" in output
