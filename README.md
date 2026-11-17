@@ -15,7 +15,7 @@ Grouped in folders, a module is named by its path without `.mk` (`general/python
 | `general/bundle` | `bundle` | PyInstaller bundles (needs `general/qt`) |
 | `general/macos-app` | `iconset install` | macOS `.app` (after `general/bundle`) |
 | `general/pypi` | `pypi-publish pypi-publish-dev` | projects published to PyPI |
-| `general/repo` | `init-repo sync-rulesets` | GitHub repo and rulesets setup (after `general/python`) |
+| `general/repo` | `init-repo sync-rulesets setup-security` | GitHub repo and rulesets setup (after `general/python`) |
 | `dcc/maya` | `venv dev dist maya-module-file install-module install uninstall dispatch-pytest` | Autodesk Maya packages |
 | `dcc/blender` | `extension validate install uninstall` | Blender extensions |
 
@@ -48,7 +48,7 @@ The Copier templates [`copier-python-project`](https://github.com/sowwic/copier-
 
 ## Repository setup
 
-The `general/repo` module adds `init-repo` and `sync-rulesets`. They run `scripts/repo_setup.py` of [`sowwic/gh-workflows`](https://github.com/sowwic/gh-workflows)
+The `general/repo` module adds `init-repo`, `sync-rulesets` and `setup-security`. They run `scripts/repo_setup.py` of [`sowwic/gh-workflows`](https://github.com/sowwic/gh-workflows)
 (needs `git` and an authenticated `gh`). They are separate on purpose:
 
 - `make init-repo`: for a **new** project only. Creates the GitHub repo with `main` (initial commit) and `develop`
@@ -73,6 +73,7 @@ Set variables **before** the `include`, the modules only use `?=` defaults:
 | `APP_NAME`, `PACKAGE_NAME` | none, required | Project (distribution) name and import name |
 | `RELEASE_BRANCH`, `DEVELOP_BRANCH` | `main`, `develop` | Used by `release`, `init-repo` and `sync-rulesets` |
 | `GH_WORKFLOWS_REF` | `v1` | Version of `sowwic/gh-workflows` whose `release.py` `release` runs, and whose `repo_setup.py` runs `init-repo` and `sync-rulesets` |
+| `SECURITY_FLAGS` | none | Flags of `setup-security`, each `on\|off`: `--dependabot-alerts` (on), `--dependabot-security-updates` (on), `--secret-scanning` (on), `--push-protection` (off), `--non-provider-patterns` (off), `--validity-checks` (off), `--private-reporting` (on), `--code-scanning` (off), `--dry-run` |
 | `REPO_FLAGS` | none | Extra flags of `init-repo`, e.g. `--private`, `--repo owner/name`, `--dry-run` |
 | `RULESET_FLAGS`, `RULESET_CHECKS` | none | Extra flags of `sync-rulesets` (`--dry-run`, `--prune`), and the required checks of the develop branch, comma separated |
 | `LINT_PATHS` | `src tests` | Paths of `lint`, `lint-fix` and `format` |
