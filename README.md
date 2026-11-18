@@ -80,6 +80,7 @@ Set variables **before** the `include`, the modules only use `?=` defaults:
 | `PYTEST_CMD`, `PYTEST_PDB_CMD` | `uv run pytest tests`, the same with `-vvv --pdb ...` | What `pytest` and `pytest-pdb` run |
 | `BUILD_PREREQS` | none | Targets `build` needs first, e.g. `qrc` |
 | `DIST_DIR`, `BUILD_DIR`, `MKDOCS_SITE_DIR`, `TEST_OUTPUT_DIR` | `dist build site .test_output` | Folders `clean` removes |
+| `DIST_EXTRAS` | none | `dcc/maya`: extras of the package to install into the module (`[project.optional-dependencies]`), space or comma separated: `DIST_EXTRAS = usd` in the Makefile, or `make install DIST_EXTRAS=usd` for one run. `DIST_PACKAGE` replaces what is installed altogether (`.` by default, `.[extras]` with extras) |
 | `ENV_FILE` | `maya.mk`: `MAYA_CI_ENV_FILE`, `./.env`, `~/.config/maya-ci.env`; `blender.mk`: `BLENDER_CI_ENV_FILE`, `./.env`, `~/.config/blender-ci.env` | File with `MAYAPY`/`MAYA_MODULE_PATH` or `BLENDER` |
 
 Add steps to a shared target with a double-colon rule in the project Makefile, after the include:

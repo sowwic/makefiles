@@ -297,6 +297,38 @@ def test_maya_dist_installs_from_the_project_folder_not_from_a_wheel(make_projec
     assert "uv build" not in output and "*.whl" not in output
 
 
+def test_maya_dist_extras_are_installed_with_the_package(make_project):
+    project = make_project(["general/python", "dcc/maya"], before="DIST_EXTRAS = usd")
+
+    output = dry(project, "dist")
+
+    assert 'uv pip install --target dist/demo_pkg_module/python ".[usd]"\n' in output
+
+
+def test_maya_dist_extras_can_be_spaces_or_commas(make_project):
+    for value in ("usd docs", "usd, docs", "usd,docs"):
+        project = make_project(
+            ["general/python", "dcc/maya"], before=f"DIST_EXTRAS = {value}"
+        )
+        assert '".[usd,docs]"' in dry(project, "dist"), value
+
+
+def test_maya_dist_extras_can_be_given_to_one_run(make_project):
+    project = make_project(["general/python", "dcc/maya"])
+
+    assert "python .\n" in dry(project, "dist")
+    assert '".[usd]"' in dry(project, "dist", "DIST_EXTRAS=usd")
+    assert '".[usd]"' in dry(project, "install", "DIST_EXTRAS=usd")
+
+
+def test_maya_dist_package_can_be_overridden(make_project):
+    project = make_project(
+        ["general/python", "dcc/maya"], before='DIST_PACKAGE = ".[usd]" ./extra'
+    )
+
+    assert 'python ".[usd]" ./extra\n' in dry(project, "dist")
+
+
 def test_maya_dist_runs_the_build_prerequisites_first(make_project):
     project = make_project(
         ["general/python", "general/qt", "dcc/maya"], before="BUILD_PREREQS = qrc"
